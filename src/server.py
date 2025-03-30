@@ -262,22 +262,8 @@ def virt_protect(addr: int, page_rights: str) -> bool:
     Returns:
         bool: True if the protection change was successful, False otherwise.
     """
-    if page_rights == "Execute":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.Execute)
-    elif page_rights == "ExecuteRead":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.ExecuteRead)
-    elif page_rights == "ExecuteReadWrite":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.ExecuteReadWrite)
-    elif page_rights == "ExecuteReadWriteCopy":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.ExecuteReadWriteCopy)
-    elif page_rights == "NoAccess":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.NoAccess)
-    elif page_rights == "ReadOnly":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.ReadOnly)
-    elif page_rights == "ReadWrite":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.ReadWrite)
-    elif page_rights == "WriteCopy":
-        return dbgClient.virt_protect(addr, PageRightsConfiguration.WriteCopy)
+    page_prot = PageRightsConfiguration(page_rights)
+    return dbgClient.virt_protect(addr, page_prot)
 
 @mcp.tool()
 def virt_free(addr: int) -> bool:
@@ -307,6 +293,9 @@ def memset(addr: int, byte_val: int, size: int) -> bool:
     """
     return dbgClient.memset(addr, byte_val, size)
 
+
+@mcp.tool()
+def set_breakpoint(address_or_symbol: int | str,  name: str = None, bp_type: str ) -> bool:
 
 
 def main():
