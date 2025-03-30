@@ -1,5 +1,5 @@
 from x64dbg_automate import X64DbgClient
-from x64dbg_automate.models import PageRightsConfiguration
+from x64dbg_automate.models import PageRightsConfiguration, StandardBreakpointType, HardwareBreakpointType, MemoryBreakpointType
 from fastmcp import FastMCP
 
 mcp = FastMCP("github.com/CaptainNox/x64dbg-mcp")
@@ -263,6 +263,9 @@ def virt_protect(addr: int, page_rights: str) -> bool:
         bool: True if the protection change was successful, False otherwise.
     """
     page_prot = PageRightsConfiguration(page_rights)
+    if page_prot is None:
+        raise ValueError(f"Invalid page protection: {page_rights}.")
+    
     return dbgClient.virt_protect(addr, page_prot)
 
 @mcp.tool()
@@ -295,8 +298,163 @@ def memset(addr: int, byte_val: int, size: int) -> bool:
 
 
 @mcp.tool()
-def set_breakpoint(address_or_symbol: int | str,  name: str = None, bp_type: str ) -> bool:
+def set_breakpoint(address_or_symbol: int | str,  name: str = None, bp_type: str = "short") -> bool:
+    """
+    Set a breakpoint at the specified address or symbol.
 
+    Args:
+        address_or_symbol (int | str): Address or symbol name to set the breakpoint at.
+        name (str): Name of the breakpoint. Default is None.
+        bp_type (str): Type of breakpoint. Default is "short".
+            The types are: short, ss (Singleshot), Long, Ud2
+    
+    Returns:
+        bool: True if the breakpoint was set successfully, False otherwise.
+    """
+    bp_type = StandardBreakpointType(bp_type)
+    if bp_type is None:
+        raise ValueError(f"Invalid breakpoint type: {bp_type}.")
+    
+    return dbgClient.set_breakpoint(
+        address_or_symbol=address_or_symbol, 
+        name=name, 
+        bp_type=bp_type
+    )
+
+@mcp.tool()
+def set_hardware_breakpoint(address_or_symbol: int | str, bp_type: str = "x", size: int = 1) -> bool:
+    """
+    Set a hardware breakpoint at the specified address or symbol.
+
+    Args:
+        address_or_symbol (int | str): Address or symbol name to set the hardware breakpoint at.
+        bp_type (str): Type of hardware breakpoint. Default is "execute".
+            The types are: x (execute), r (read), w (write)
+        size (int): Size of the hardware breakpoint. Default is 1.
+
+    Returns:
+        bool: True if the hardware breakpoint was set successfully, False otherwise.
+    """
+    bp_type = HardwareBreakpointType(bp_type)
+    if bp_type is None:
+        raise ValueError(f"Invalid hardware breakpoint type: {bp_type}.")
+
+    return dbgClient.set_hardware_breakpoint(
+        address_or_symbol=address_or_symbol, 
+        bp_type=bp_type, 
+        size=size
+    )
+
+@mcp.tool()
+def set_memory_breakpoin(address_or_symbol: int | str, bp_type: str = "a", singleshoot: bool = False) -> bool:
+    """
+    Set a memory breakpoint at the specified address or symbol.
+
+    Args:
+        address_or_symbol (int | str): Address or symbol name to set the memory breakpoint at.
+        bp_type (str): Type of memory breakpoint. Default is "access".
+            The types are: a (access), r (read), w (write), x (execute)
+        singleshoot (bool): Whether to set the breakpoint as a singleshoot. Default is False.
+
+    Returns:
+        bool: True if the memory breakpoint was set successfully, False otherwise.
+    """
+    bp_type = MemoryBreakpointType(bp_type)
+    if bp_type is None:
+        raise ValueError(f"Invalid memory breakpoint type: {bp_type}.")
+
+    return dbgClient.set_memory_breakpoint(
+        address_or_symbol=address_or_symbol, 
+        bp_type=bp_type, 
+        singleshoot=singleshoot
+    )
+
+@mcp.tool()
+def clear_breakpoint(address_symbol_or_none: int | str | None = None) -> bool:
+    """
+    Clear a breakpoint at the specified address or symbol.
+
+    Args:
+        address_symbol_or_none (int | str | None): Address or symbol name to clear the breakpoint at. Default is None.
+            If None, all breakpoints will be cleared.
+
+    Returns:
+        bool: True if the breakpoint was cleared successfully, False otherwise.
+    """
+    return dbgClient.clear_breakpoint(address_symbol_or_none)
+
+@mcp.tool()
+def clear_hardware_breakpoint(address_symbol_or_none: int | str | None = None) -> bool:
+    """
+    Clear a hardware breakpoint at the specified address or symbol.
+
+    Args:
+        address_symbol_or_none (int | str | None): Address or symbol name to clear the hardware breakpoint at. Default is None.
+            If None, all hardware breakpoints will be cleared.
+
+    Returns:
+        bool: True if the hardware breakpoint was cleared successfully, False otherwise.
+    """
+    return dbgClient.clear_hardware_breakpoint(address_symbol_or_none)
+
+@mcp.tool()
+def clear_memory_breakpoint(address_symbol_or_none: int | str | None = None) -> bool:
+    """
+    Clear a memory breakpoint at the specified address or symbol.
+
+    Args:
+        address_symbol_or_none (int | str | None): Address or symbol name to clear the memory breakpoint at. Default is None.
+            If None, all memory breakpoints will be cleared.
+
+    Returns:
+        bool: True if the memory breakpoint was cleared successfully, False otherwise.
+    """
+    return dbgClient.clear_memory_breakpoint(address_symbol_or_none)
+
+@mcp.tool()
+def toggle_breakpoint(address_name_or_none: int | str | None = None, on: bool = True) -> bool:
+    """
+    Toggle a breakpoint at the specified address or symbol.
+
+    Args:
+        address_name_or_none (int | str | None): Address or symbol name to toggle the breakpoint at. Default is None.
+            If None, all breakpoints will be toggled.
+        on (bool): Whether to enable or disable the breakpoint. Default is True (enable).
+    
+    Returns:
+        bool: True if the breakpoint was toggled successfully, False otherwise.
+    """
+    dbgClient.toggle_breakpoint(address_name_or_none, on)
+
+@mcp.tool()
+def toggle_hardware_breakpoint(address_name_or_none: int | str | None = None, on: bool = True) -> bool:
+    """
+    Toggle a hardware breakpoint at the specified address or symbol.
+
+    Args:
+        address_name_or_none (int | str | None): Address or symbol name to toggle the hardware breakpoint at. Default is None.
+            If None, all hardware breakpoints will be toggled.
+        on (bool): Whether to enable or disable the hardware breakpoint. Default is True (enable).
+    
+    Returns:
+        bool: True if the hardware breakpoint was toggled successfully, False otherwise.
+    """
+    dbgClient.toggle_hardware_breakpoint(address_name_or_none, on)
+
+@mcp.tool()
+def toggle_memory_breakpoint(address_name_or_none: int | str | None = None, on: bool = True) -> bool:
+    """
+    Toggle a memory breakpoint at the specified address or symbol.
+
+    Args:
+        address_name_or_none (int | str | None): Address or symbol name to toggle the memory breakpoint at. Default is None.
+            If None, all memory breakpoints will be toggled.
+        on (bool): Whether to enable or disable the memory breakpoint. Default is True (enable).
+    
+    Returns:
+        bool: True if the memory breakpoint was toggled successfully, False otherwise.
+    """
+    dbgClient.toggle_memory_breakpoint(address_name_or_none, on)
 
 def main():
     print("Starting the x64dbg MCP server!")
