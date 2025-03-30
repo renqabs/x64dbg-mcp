@@ -456,6 +456,140 @@ def toggle_memory_breakpoint(address_name_or_none: int | str | None = None, on: 
     """
     dbgClient.toggle_memory_breakpoint(address_name_or_none, on)
 
+@mcp.tool()
+def get_reg(reg_name: str) -> int:
+    """
+    Get the value of a register.
+
+    Args:
+        reg_name (str): Name of the register to get the value of.
+
+    Returns:
+        int: Value of the register.
+    """
+    return dbgClient.get_reg(reg_name)
+
+@mcp.tool()
+def set_reg(reg_name: str, value: int) -> bool:
+    """
+    Set the value of a register.
+
+    Args:
+        reg_name (str): Name of the register to set the value of.
+        value (int): Value to set the register to.
+
+    Returns:
+        bool: True if the register was set successfully, False otherwise.
+    """
+    return dbgClient.set_reg(reg_name, value)
+
+@mcp.tool()
+def get_symbol_at(address: int) -> str:
+    """
+    Get the symbol name at the specified address.
+
+    Args:
+        address (int): Address to get the symbol name at.
+
+    Returns:
+        str: Symbol name at the specified address.
+    """
+    return dbgClient.get_symbol_at(address)
+
+@mcp.tool()
+def assemble_at(address: int, instr: str) -> bool:
+    """
+    Assemble code at the specified address.
+
+    Args:
+        address (int): Address to assemble the code at.
+        instr (str): Instruction to assemble.
+
+    Returns:
+        bool: True if the assembly was successful, False otherwise.
+    """
+    return dbgClient.assemble_at(address, instr)
+
+@mcp.tool()
+def set_label_at(address: int, text: str) -> bool:
+    """
+    Set a label at the specified address.
+
+    Args:
+        address (int): Address to set the label at.
+        text (str): Text of the label.
+
+    Returns:
+        bool: True if the label was set successfully, False otherwise.
+    """
+    return dbgClient.set_label_at(address, text)
+
+@mcp.tool()
+def del_label_at(address: int) -> bool:
+    """
+    Delete a label at the specified address.
+
+    Args:
+        address (int): Address to delete the label at.
+
+    Returns:
+        bool: True if the label was deleted successfully, False otherwise.
+    """
+    return dbgClient.del_label_at(address)
+
+@mcp.tool()
+def set_comment_at(address: int, text: str) -> bool:
+    """
+    Set a comment at the specified address.
+
+    Args:
+        address (int): Address to set the comment at.
+        text (str): Text of the comment.
+
+    Returns:
+        bool: True if the comment was set successfully, False otherwise.
+    """
+    return dbgClient.set_comment_at(address, text)
+
+@mcp.tool()
+def del_comment_at(address: int) -> bool:
+    """
+    Delete a comment at the specified address.
+
+    Args:
+        address (int): Address to delete the comment at.
+
+    Returns:
+        bool: True if the comment was deleted successfully, False otherwise.
+    """
+    return dbgClient.del_comment_at(address)
+
+@mcp.tool()
+def get_label_at(address: int) -> str:
+    """
+    Get the label at the specified address.
+
+    Args:
+        address (int): Address to get the label at.
+
+    Returns:
+        str: Label at the specified address.
+    """
+    return dbgClient.get_label_at(address)
+
+@mcp.tool()
+def get_comment_at(address: int) -> str:
+    """
+    Get the comment at the specified address.
+
+    Args:
+        address (int): Address to get the comment at.
+
+    Returns:
+        str: Comment at the specified address.
+    """
+    return dbgClient.get_comment_at(address)
+
 def main():
     print("Starting the x64dbg MCP server!")
     mcp.run(transport="stdio")
