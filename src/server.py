@@ -1,5 +1,5 @@
 from x64dbg_automate import X64DbgClient
-from x64dbg_automate.models import PageRightsConfiguration, StandardBreakpointType, HardwareBreakpointType, MemoryBreakpointType
+from x64dbg_automate.models import PageRightsConfiguration, StandardBreakpointType, HardwareBreakpointType, MemoryBreakpointType, MemPage
 from fastmcp import FastMCP
 
 mcp = FastMCP("github.com/CaptainNox/x64dbg-mcp")
@@ -77,7 +77,7 @@ def pause() -> bool:
     return dbgClient.pause()
 
 @mcp.tool()
-def stepi(
+def step_into(
     step_count: int = 1, 
     pass_exceptions: bool = False, 
     swallow_exceptions: bool = False, 
@@ -105,7 +105,7 @@ def stepi(
     )
 
 @mcp.tool()
-def stepo(
+def step_over(
     step_count: int = 1, 
     pass_exceptions: bool = False, 
     swallow_exceptions: bool = False, 
@@ -296,6 +296,49 @@ def memset(addr: int, byte_val: int, size: int) -> bool:
     """
     return dbgClient.memset(addr, byte_val, size)
 
+@mcp.tool()
+def virt_query(address: int) -> dict | None:
+    """
+    Query information about a virtual memory region.
+
+    Args:
+        address (int): Address of the memory region to query.
+
+    Returns:
+        dict: Information about the virtual memory region.
+        None: If the address is invalid or the query fails.
+    """
+    mem_page: MemPage = dbgClient.virt_query(address)
+    if mem_page is None:
+        return None
+
+    return {"AllocationBase": mem_page.allocation_base,
+            "BaseAddress": mem_page.base_address,
+            "RegionSize": mem_page.region_size,
+            "State": mem_page.state,
+            "Protect": mem_page.protect,
+            "Type": mem_page.type,
+            "BaseAddress": mem_page.base_address}
+
+@mcp.tool()
+def get_memory_map() -> list[dict]:
+    """
+    Get the memory map of the debuggee.
+
+    Args:
+        None
+
+    Returns:
+        list[dict]: List of memory regions in the debuggee's address space.
+    """
+    mem_pages: MemPage = dbgClient.memmap()
+    return [{
+        "BaseAddress": mem_page.base_address,
+        "RegionSize": mem_page.region_size,
+        "State": mem_page.state,
+        "Protect": mem_page.protect,
+        "Type": mem_page.type
+    } for mem_page in mem_pages]
 
 @mcp.tool()
 def set_breakpoint(address_or_symbol: int | str,  name: str = None, bp_type: str = "short") -> bool:
@@ -589,6 +632,20 @@ def get_comment_at(address: int) -> str:
         str: Comment at the specified address.
     """
     return dbgClient.get_comment_at(address)
+
+@mcp.tool()
+def hide_debugger_peb() -> bool:
+    """
+    Hide the debugger in the debuggee's PEB (Process Environment Block).
+    This is useful for anti-debugging techniques that check for the presence of a debugger.
+
+    Args:
+        None
+
+    Returns:
+        bool: True if the debugger was hidden successfully, False otherwise.
+    """
+    return dbgClient.hide_debugger_peb()
 
 def main():
     print("Starting the x64dbg MCP server!")
