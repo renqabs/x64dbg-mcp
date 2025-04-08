@@ -2,7 +2,7 @@ from x64dbg_automate import X64DbgClient
 from x64dbg_automate.models import PageRightsConfiguration, StandardBreakpointType, HardwareBreakpointType, MemoryBreakpointType, MemPage
 from fastmcp import FastMCP
 
-mcp = FastMCP("github.com/CaptainNox/x64dbg-mcp")
+mcp = FastMCP("github.com/renqabs/x64dbg-mcp", log_level="ERROR")
 dbgClient = X64DbgClient("C:\\x64dbg\\release\\x64\\x64dbg.exe")
 
 @mcp.tool()
